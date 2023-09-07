@@ -2,10 +2,14 @@ package com.ambientbytes.pager.database
 
 import com.ambientbytes.pager.ICursor
 import com.ambientbytes.pager.IDatabase
+import com.ambientbytes.pager.IOrderCheck
 import com.ambientbytes.pager.TimestampedAsset
 import java.lang.Exception
 
-class MockDatabase : IDatabase {
+class MockDatabase(
+    private val comparator: Comparator<TimestampedAsset>,
+    private val timestampOrder: IOrderCheck<Long>
+) : IDatabase {
 
     override fun queryAssets(userId: Long, startAt: Long?): ICursor<TimestampedAsset> =
         Cursor(individualAssets, startAt)
@@ -13,7 +17,7 @@ class MockDatabase : IDatabase {
     override fun queryCollections(userId: Long, startAt: Long?): ICursor<TimestampedAsset> =
         Cursor(collections, startAt)
 
-    private class Cursor(source: Array<TimestampedAsset>, startAt: Long?) : ICursor<TimestampedAsset> {
+    private inner class Cursor(source: Array<TimestampedAsset>, startAt: Long?) : ICursor<TimestampedAsset> {
 
         private var position = -1
         private val data = if (startAt == null) source else assetsStartingAt(source, startAt)
@@ -37,15 +41,23 @@ class MockDatabase : IDatabase {
         private val canAdvance: Boolean get() = position < data.size - 1
     }
 
-    private companion object {
-        fun assetsStartingAt(data: Array<TimestampedAsset>, timestamp: Long): Array<TimestampedAsset> =
-            mutableListOf<TimestampedAsset>().apply {
-                for (a in data) {
-                    if (a.timestamp <= timestamp) {
-                        add(a)
-                    }
+    private fun assetsStartingAt(data: Array<TimestampedAsset>, timestamp: Long): Array<TimestampedAsset> =
+        mutableListOf<TimestampedAsset>().apply {
+            for (a in data) {
+                if (timestampOrder.inOrder(a.timestamp, timestamp)) {
+                    add(a)
                 }
-            }.toTypedArray()
+            }
+            sortWith(comparator)
+        }.toTypedArray()
+
+    fun allAssets(data: Array<TimestampedAsset>): Array<TimestampedAsset> =
+        mutableListOf<TimestampedAsset>().apply {
+            addAll(data)
+            sortWith(comparator)
+        }.toTypedArray()
+
+    private companion object {
 
         val collections = arrayOf(
             TimestampedAsset(20, 85),

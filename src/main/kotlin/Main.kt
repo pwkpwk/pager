@@ -5,17 +5,19 @@ import com.ambientbytes.pager.database.MockDatabase
 
 //import java.sql.*
 
-fun main(args: Array<String>) {
-    println("Hello World!")
+private fun isDescending(args: Array<String>): Boolean = args.isNotEmpty() && args[0].contentEquals("desc", true)
 
-    // Try adding program arguments via Run/Debug configuration.
-    // Learn more about running applications: https://www.jetbrains.com/help/idea/running-applications.html.
+fun main(args: Array<String>) {
     println("Program arguments: ${args.joinToString()}\n\nData source:")
 
-    val database = MockDatabase()
+    val descending = isDescending(args)
+    val comparator = if (descending) TimestampedAsset.DescendingComparator else TimestampedAsset.AscendingComparator
+    val order = if (descending) TimestampedAsset.DescendingTimestampOrder else TimestampedAsset.AscendingTimestampOrder
+
+    val database = MockDatabase(comparator, order)
 
     for (a in MergingDataSource(
-        TimestampedAsset.AscendingComparator,
+        comparator,
         database.queryAssets(1, null),
         database.queryCollections(1, null)
     )) {
@@ -23,7 +25,7 @@ fun main(args: Array<String>) {
     }
     println()
 
-    Pager(1, database).let {
+    Pager(1, database, comparator).let {
         var pageNumber = 1
         var after: TimestampedAsset? = null
         var done = false

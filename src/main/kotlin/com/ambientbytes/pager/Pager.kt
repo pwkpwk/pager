@@ -1,6 +1,10 @@
 package com.ambientbytes.pager
 
-class Pager(private val userId: Long, private val database: IDatabase) {
+class Pager(
+    private val userId: Long,
+    private val database: IDatabase,
+    private val comparator: Comparator<TimestampedAsset>
+) {
     fun getPage(pageSize: Int, after: TimestampedAsset?): Page {
         var skippedItems = 0
         var discardedItems = 0
@@ -9,7 +13,7 @@ class Pager(private val userId: Long, private val database: IDatabase) {
             var skippedHead = after == null
 
             for (asset in MergingDataSource(
-                TimestampedAsset.AscendingComparator,
+                comparator,
                 database.queryCollections(userId, after?.timestamp),
                 database.queryAssets(userId, after?.timestamp)
             )) {

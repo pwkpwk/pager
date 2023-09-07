@@ -3,6 +3,12 @@ package com.ambientbytes.pager
 import java.util.*
 import kotlin.Comparator
 
+/**
+ * Single-use one-way read-only data source that enumerates and orders timestamped assets
+ *
+ * @param comparator Asset comparator that defines the order in that assets come out of the data source.
+ * @param cursors Collection of cursors each enumerating a subset of data
+ */
 class MergingDataSource(
     comparator: Comparator<TimestampedAsset>,
     vararg cursors: ICursor<TimestampedAsset>

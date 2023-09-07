@@ -13,5 +13,9 @@ data class TimestampedAsset(val id: Long, val timestamp: Long) {
                 val tsc = o1.timestamp.compareTo(o2.timestamp)
                 if (tsc != 0) tsc else o2.id.compareTo(o1.id)
             }
+
+        val AscendingTimestampOrder: IOrderCheck<Long> = IOrderCheck { value, marker -> value <= marker }
+
+        val DescendingTimestampOrder: IOrderCheck<Long> = IOrderCheck { value, marker -> value >= marker }
     }
 }
