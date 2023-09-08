@@ -20,7 +20,7 @@ class MockDatabase(
     private inner class Cursor(source: Array<TimestampedAsset>, startAt: Long?) : ICursor<TimestampedAsset> {
 
         private var position = -1
-        private val data = if (startAt == null) source else assetsStartingAt(source, startAt)
+        private val data = if (startAt == null) allAssets(source) else assetsStartingAt(source, startAt)
 
         override val current: TimestampedAsset
             get() =

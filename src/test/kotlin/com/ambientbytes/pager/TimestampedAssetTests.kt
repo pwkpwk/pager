@@ -1,6 +1,6 @@
 package com.ambientbytes.pager
 
-import kotlin.test.Test
+import org.testng.annotations.Test
 import kotlin.test.assertEquals
 
 class TimestampedAssetTests {
